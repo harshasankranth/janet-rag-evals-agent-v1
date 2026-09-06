@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "janet"
+version = "0.1.0"
+description = "A voice-first multi-agent assistant: wake-word detection, local STT, a LangGraph multi-agent orchestrator, RAG, tool-calling, an eval loop, and a Live2D avatar frontend."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "harshasankranth" }]
+# Intentionally empty for now — no dependencies installed yet.
+# Populated incrementally as each subsystem below is implemented.
+dependencies = []
+
+[project.optional-dependencies]
+stt = []      # wake-word + local speech-to-text
+tts = []      # text-to-speech
+agents = []   # LangGraph orchestrator, LLM clients, tool-calling
+rag = []      # embeddings, vector store, retrieval
+eval = []     # eval harness, scoring
+dev = []      # linting, testing, formatting
+
+[tool.setuptools.packages.find]
+where = ["src"]
