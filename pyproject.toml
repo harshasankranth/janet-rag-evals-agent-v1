@@ -9,17 +9,19 @@ description = "A voice-first multi-agent assistant: wake-word detection, local S
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [{ name = "harshasankranth" }]
-# Intentionally empty for now — no dependencies installed yet.
-# Populated incrementally as each subsystem below is implemented.
-dependencies = []
+dependencies = ["python-dotenv>=1.0"]
 
 [project.optional-dependencies]
-stt = []      # wake-word + local speech-to-text
-tts = []      # text-to-speech
-agents = []   # LangGraph orchestrator, LLM clients, tool-calling
+stt = ["faster-whisper>=1.0", "sounddevice>=0.4.6", "numpy>=1.26,<3", "openwakeword>=0.6"]      # wake word + local speech-to-text
+tts = ["piper-tts>=1.2", "sounddevice>=0.4.6", "numpy>=1.26,<3", "elevenlabs>=1.0", "sarvamai>=0.1", "edge-tts>=7.0", "soundfile>=0.13"]           # text-to-speech
+agents = ["ollama>=0.6", "groq>=1.7", "google-genai>=2.22", "ddgs>=9.0"]   # LLM clients, tool-calling
+ui = ["fastapi>=0.115", "uvicorn>=0.33", "websockets>=13"]     # local HUD frontend (orb/subtitles/waveform)
 rag = []      # embeddings, vector store, retrieval
 eval = []     # eval harness, scoring
 dev = []      # linting, testing, formatting
+
+[project.scripts]
+janet = "janet.main:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
