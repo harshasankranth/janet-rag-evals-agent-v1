@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>JANET</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="scanlines"></div>
+
+  <header class="topbar">
+    <span class="brand">J.A.N.E.T.</span>
+    <div class="topbar-right">
+      <div id="emotion-panel" class="emotion-panel" hidden>
+        <button class="chip" data-emotion="neutral">😐</button>
+        <button class="chip" data-emotion="happy">😊</button>
+        <button class="chip" data-emotion="excited">✨</button>
+        <button class="chip" data-emotion="curious">🤔</button>
+        <button class="chip" data-emotion="surprised">😮</button>
+        <button class="chip" data-emotion="confused">😕</button>
+        <button class="chip" data-emotion="sleepy">😴</button>
+        <button class="chip" data-emotion="thinking">🧠</button>
+      </div>
+      <button id="demo-toggle" class="demo-toggle" type="button">DEMO</button>
+      <span class="state-label" id="state-label">OFFLINE</span>
+    </div>
+  </header>
+
+  <main class="stage">
+    <div class="avatar-wrap">
+    <svg id="janet-avatar" viewBox="0 0 400 520" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <filter id="glow" x="-150%" y="-150%" width="400%" height="400%">
+          <feGaussianBlur stdDeviation="9" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+
+      <!-- ambient holographic network, behind everything -->
+      <g id="network" filter="url(#glow)">
+        <circle cx="200" cy="170" r="210" fill="none" stroke="var(--amber)" stroke-width="1" opacity="0.3" />
+        <circle cx="200" cy="170" r="270" fill="none" stroke="var(--amber)" stroke-width="0.8" opacity="0.2" />
+        <circle cx="200" cy="170" r="320" fill="none" stroke="var(--amber)" stroke-width="0.6" opacity="0.13" />
+        <g id="network-dots" opacity="0.75">
+          <circle cx="4" cy="45" r="3.5" fill="var(--amber)" />
+          <circle cx="400" cy="80" r="3" fill="var(--amber)" />
+          <circle cx="20" cy="320" r="3" fill="var(--amber)" />
+          <circle cx="384" cy="310" r="3.5" fill="var(--amber)" />
+          <circle cx="200" cy="-60" r="2.5" fill="var(--amber)" />
+          <circle cx="-30" cy="190" r="2.5" fill="var(--amber)" />
+          <circle cx="430" cy="210" r="2.5" fill="var(--amber)" />
+          <circle cx="100" cy="-40" r="2" fill="var(--amber)" />
+          <circle cx="310" cy="-35" r="2" fill="var(--amber)" />
+        </g>
+        <g id="network-lines" opacity="0.4" stroke="var(--amber)" stroke-width="1.2" fill="none">
+          <line x1="4" y1="45" x2="95" y2="115" />
+          <line x1="400" y1="80" x2="300" y2="130" />
+          <line x1="20" y1="320" x2="115" y2="260" />
+          <line x1="384" y1="310" x2="288" y2="252" />
+        </g>
+      </g>
+
+      <!-- body -->
+      <g id="body">
+        <rect x="184" y="292" width="32" height="26" rx="8" fill="var(--cream)" />
+        <path id="body-shape"
+          d="M150,312 Q150,300 165,300 L235,300 Q250,300 250,312
+             L268,480 Q270,502 248,502 L152,502 Q130,502 132,480 Z"
+          fill="var(--yellow)" />
+        <path id="body-panel"
+          d="M178,322 Q178,312 190,312 L210,312 Q222,312 222,322 L228,470 Q228,486 214,486 L186,486 Q172,486 172,470 Z"
+          fill="var(--cream)" />
+        <path d="M200,350 L206,362 L200,374 L194,362 Z" fill="var(--amber)" opacity="0.85" />
+        <path d="M120,335 Q104,340 100,365 L96,440 Q95,455 108,455 L124,455 Q134,455 133,442 L138,352 Q139,332 120,335 Z"
+          fill="var(--cream)" />
+        <path d="M280,335 Q296,340 300,365 L304,440 Q305,455 292,455 L276,455 Q266,455 267,442 L262,352 Q261,332 280,335 Z"
+          fill="var(--cream)" />
+      </g>
+
+      <!-- halo antenna -->
+      <g id="halo" filter="url(#glow)">
+        <line x1="200" y1="38" x2="200" y2="60" stroke="var(--amber)" stroke-width="5" stroke-linecap="round" />
+        <circle cx="200" cy="34" r="8" fill="var(--amber)" />
+        <ellipse id="halo-ring" cx="200" cy="4" rx="46" ry="15" fill="none" stroke="var(--amber)" stroke-width="4"
+          transform="rotate(-10 200 10)" />
+      </g>
+
+      <!-- head -->
+      <g id="head">
+        <rect x="88" y="58" width="224" height="244" rx="62" fill="var(--cream)" />
+        <rect x="100" y="70" width="200" height="220" rx="52" fill="var(--yellow)" />
+        <circle id="ear-left" cx="76" cy="192" r="27" fill="var(--cream)" />
+        <circle cx="76" cy="192" r="14" fill="var(--amber-dim)" />
+        <circle id="ear-right" cx="324" cy="192" r="27" fill="var(--cream)" />
+        <circle cx="324" cy="192" r="14" fill="var(--amber-dim)" />
+
+        <rect x="112" y="84" width="176" height="196" rx="48" fill="var(--face-dark)" />
+
+        <g id="face">
+          <g id="eye-left" transform="translate(163,178)"></g>
+          <g id="eye-right" transform="translate(237,178)"></g>
+          <g id="mouth" transform="translate(200,228)"></g>
+          <g id="accessory" transform="translate(200,110)" opacity="0"></g>
+        </g>
+      </g>
+    </svg>
+    </div>
+
+    <canvas id="wave-canvas" width="360" height="40"></canvas>
+
+    <button id="talk-button" class="talk-button" type="button">PRESS TO TALK</button>
+  </main>
+
+  <aside class="subtitles">
+    <div class="line" id="subtitle-line">&nbsp;</div>
+  </aside>
+
+  <script src="/static/avatar.js"></script>
+  <script src="/static/app.js"></script>
+  <script src="/static/demo.js"></script>
+</body>
+</html>
