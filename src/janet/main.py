@@ -11,9 +11,10 @@ import webbrowser
 from janet import config
 from janet.agents.base import Message
 from janet.agents.factory import get_provider
-from janet.agents.persona import SYSTEM_PROMPT, extract_emotion
+from janet.agents.persona import build_system_prompt, extract_emotion
 from janet.agents.tool_loop import run_turn
 from janet.agents.tools import TOOLS
+from janet.memory import load_facts
 from janet.stt.recorder import record_utterance
 from janet.stt.transcriber import Transcriber
 from janet.stt.wakeword import BrowserPushToTalkDetector, PushToTalkDetector, WakeWordDetector
@@ -137,7 +138,7 @@ def main() -> None:
         wake_word = PushToTalkDetector()
         prompt = "Press Enter once to start talking to Janet. Press Ctrl+C to exit anytime."
         greeting = "Hey, I'm Janet, press Enter to get started."
-    history: list[Message] = [{"role": "system", "content": SYSTEM_PROMPT}]
+    history: list[Message] = [{"role": "system", "content": build_system_prompt(load_facts())}]
 
     print(prompt)
     set_state("idle")

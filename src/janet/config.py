@@ -45,5 +45,7 @@ TTS_FALLBACK_PROVIDER = os.getenv("TTS_FALLBACK_PROVIDER", "piper")
 
 WAKE_WORD_MODEL = os.getenv("WAKE_WORD_MODEL")
 
+MEMORY_FILE = os.getenv("MEMORY_FILE", "data/memory.json")
+
 UI_ENABLED = os.getenv("UI_ENABLED", "true").lower() == "true"
 UI_PORT = int(os.getenv("UI_PORT", "8765"))

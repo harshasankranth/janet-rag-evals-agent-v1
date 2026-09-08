@@ -8,6 +8,9 @@ venv/
 # secrets
 .env
 
+# personal data (Janet's remembered facts about the user)
+data/
+
 # model weights / local artifacts
 *.gguf
 *.bin

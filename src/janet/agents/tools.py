@@ -12,6 +12,8 @@ from typing import Any, Callable
 
 from ddgs import DDGS
 
+from janet import memory
+
 _TYPE_MAP = {
     str: "string",
     int: "integer",
@@ -104,4 +106,19 @@ def echo(text: str) -> str:
     return text
 
 
-TOOLS: list[Callable[..., Any]] = [get_current_datetime, web_search, echo]
+def remember_fact(fact: str) -> str:
+    """Permanently remember something about the user for future conversations,
+    even after this session ends — their name, preferences, ongoing projects,
+    or other durable context. Only use this for things worth recalling long
+    term, not one-off details that only matter for the current exchange.
+
+    Args:
+        fact: The fact to remember, written plainly and completely so it
+            still makes sense on its own later (e.g. "The user's name is
+            Harsha" rather than just "Harsha").
+    """
+    memory.remember(fact)
+    return "Got it, I'll remember that."
+
+
+TOOLS: list[Callable[..., Any]] = [get_current_datetime, web_search, echo, remember_fact]
