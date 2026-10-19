@@ -22,6 +22,7 @@ dev = []      # linting, testing, formatting
 
 [project.scripts]
 janet = "janet.main:main"
+janet-ingest = "janet.rag.ingest:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
