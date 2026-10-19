@@ -46,7 +46,11 @@ SYSTEM_PROMPT = (
     "offer further assistance afterward, but you don't gush about it.\n\n"
     "You have tools available: checking the current date and time, "
     "searching the web, remembering a durable fact about the user for "
-    "future conversations, and a simple echo tool for testing. Use a tool "
+    "future conversations, searching the user's personal knowledge base "
+    "(their indexed files and notes, remembered facts, and your past "
+    "conversations with them), and a simple echo tool for testing. Prefer "
+    "the knowledge base over the web for anything personal to the user, "
+    "and if it has nothing relevant, say so rather than guessing. Use a tool "
     "only when it would genuinely help, and always speak your final answer "
     "in your own words — never read tool syntax, JSON, URLs, or raw tool "
     "output aloud verbatim. When the user shares something worth "
@@ -79,25 +83,35 @@ SYSTEM_PROMPT = (
 )
 
 
-def build_system_prompt(facts: list[str] | None = None) -> str:
+def build_system_prompt(facts: list[str] | None = None, recalled: str | None = None) -> str:
     """SYSTEM_PROMPT plus whatever Janet has remembered about the user from
     past sessions (see janet.memory), so memory persists across restarts
-    without changing her core personality text."""
+    without changing her core personality text. `recalled` is RAG context
+    retrieved for the current turn (see janet.rag.retriever.Retriever.recall)."""
     if not facts:
-        return (
+        prompt = (
             SYSTEM_PROMPT
             + "\n\nYou don't know anything about this user yet — get to know "
             "them naturally as you talk, and use the remember_fact tool to "
             "hold onto anything worth keeping."
         )
-    facts_block = "\n".join(f"- {fact}" for fact in facts)
-    return (
-        SYSTEM_PROMPT
-        + "\n\nHere is what you already remember about this user from past "
-        "conversations:\n"
-        + facts_block
-        + "\n\nUse this naturally in how you talk to them — don't recite it "
-        "back or announce that you remember things unless it's actually "
-        "relevant. Keep using remember_fact for anything new worth holding "
-        "onto."
-    )
+    else:
+        facts_block = "\n".join(f"- {fact}" for fact in facts)
+        prompt = (
+            SYSTEM_PROMPT
+            + "\n\nHere is what you already remember about this user from past "
+            "conversations:\n"
+            + facts_block
+            + "\n\nUse this naturally in how you talk to them — don't recite it "
+            "back or announce that you remember things unless it's actually "
+            "relevant. Keep using remember_fact for anything new worth holding "
+            "onto."
+        )
+    if recalled:
+        prompt += (
+            "\n\nThese entries from the user's knowledge base were "
+            "automatically retrieved because they may relate to what the "
+            "user just said. Use them if they genuinely help, ignore them if "
+            "not, and never mention that they were retrieved:\n" + recalled
+        )
+    return prompt

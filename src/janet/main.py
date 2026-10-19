@@ -15,6 +15,7 @@ from janet.agents.persona import build_system_prompt, extract_emotion
 from janet.agents.tool_loop import run_turn
 from janet.agents.tools import TOOLS
 from janet.memory import load_facts
+from janet.rag.retriever import get_retriever
 from janet.stt.recorder import record_utterance
 from janet.stt.transcriber import Transcriber
 from janet.stt.wakeword import BrowserPushToTalkDetector, PushToTalkDetector, WakeWordDetector
@@ -110,6 +111,10 @@ def main() -> None:
     transcriber = Transcriber()
     speaker = Speaker()
     llm = get_provider()
+    retriever = get_retriever()
+    if retriever:
+        retriever.sync_memories(load_facts())
+        print(f"[rag] knowledge base loaded: {retriever.store.stats()['by_kind'] or 'empty'}")
 
     def say(text: str, language: str | None = None, emotion: str | None = None) -> None:
         interrupt_event.clear()
@@ -167,8 +172,13 @@ def main() -> None:
                 set_state("idle")
                 break
 
-            history.append({"role": "user", "content": text})
             set_state("thinking")
+            # Rebuild the system prompt each turn: fresh facts (remember_fact may have
+            # added some) plus whatever the knowledge base recalls for this utterance.
+            facts = load_facts()
+            recalled = retriever.recall(text, exclude_texts=set(facts)) if retriever else None
+            history[0]["content"] = build_system_prompt(facts, recalled)
+            history.append({"role": "user", "content": text})
             try:
                 reply = run_turn(llm, history, tools=TOOLS)
             except RuntimeError as exc:
@@ -180,6 +190,8 @@ def main() -> None:
 
             reply, emotion = extract_emotion(reply)
             print(f"Janet: {reply}")
+            if retriever:
+                retriever.add_conversation_turn(text, reply)
             play_answer_ready()
             say(reply, language=language, emotion=emotion)
             play_listening_started()

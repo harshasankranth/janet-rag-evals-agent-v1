@@ -13,6 +13,7 @@ from typing import Any, Callable
 from ddgs import DDGS
 
 from janet import memory
+from janet.rag.retriever import get_retriever
 
 _TYPE_MAP = {
     str: "string",
@@ -118,7 +119,30 @@ def remember_fact(fact: str) -> str:
             Harsha" rather than just "Harsha").
     """
     memory.remember(fact)
+    # Also index it, so it stays recallable after the JSON list's FIFO cap evicts it.
+    if (retriever := get_retriever()) is not None:
+        retriever.add_memory(fact)
     return "Got it, I'll remember that."
 
 
-TOOLS: list[Callable[..., Any]] = [get_current_datetime, web_search, echo, remember_fact]
+def search_knowledge(query: str, source: str = "all") -> str:
+    """Search the user's own knowledge base: documents and notes they have
+    indexed, facts you have remembered about them, and your past
+    conversations with them. Use this when the user asks about their own
+    files, notes, or something you discussed before, or whenever the
+    answer is likely personal to them rather than general knowledge.
+
+    Args:
+        query: What to look for, phrased as a short descriptive search
+            query (e.g. "lease pet policy" or "book recommendation last month").
+        source: Where to search: "all", "documents", "memories", or
+            "conversations".
+    """
+    retriever = get_retriever()
+    if retriever is None:
+        return "The knowledge base is not available right now."
+    kinds = {"documents": {"document"}, "memories": {"memory"}, "conversations": {"conversation"}}.get(source)
+    return retriever.search(query, kinds=kinds)
+
+
+TOOLS: list[Callable[..., Any]] = [get_current_datetime, web_search, echo, remember_fact, search_knowledge]

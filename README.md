@@ -58,6 +58,23 @@ janet/
 This is a bare scaffold: package structure and project metadata only, no
 dependencies installed and no implementation yet.
 
+## Knowledge base (RAG)
+
+Janet keeps a local vector index (`data/rag/`) of three kinds of records,
+embedded with Gemini's multilingual `gemini-embedding-001`:
+
+- **documents** you index: `janet-ingest path/to/notes/ lease.pdf`
+  (`--list` to see what's indexed, `--remove <file>` to drop one; re-running
+  on a changed file replaces its old chunks)
+- **memories** saved via `remember_fact` (existing `memory.json` facts are
+  indexed automatically on startup)
+- **conversation turns**, saved after every reply
+
+Each turn, the closest matches above `RAG_MIN_SCORE` are added to the system
+prompt automatically, and the model can also call the `search_knowledge` tool
+for a deeper look. Install with `pip install -e .[rag]`; settings are in
+`.env.example`.
+
 ## Setup
 
 1. Create/activate a virtualenv (Python 3.11+):
