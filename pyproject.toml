@@ -16,7 +16,7 @@ stt = ["faster-whisper>=1.0", "sounddevice>=0.4.6", "numpy>=1.26,<3", "openwakew
 tts = ["piper-tts>=1.2", "sounddevice>=0.4.6", "numpy>=1.26,<3", "elevenlabs>=1.0", "sarvamai>=0.1", "edge-tts>=7.0", "soundfile>=0.13"]           # text-to-speech
 agents = ["ollama>=0.6", "groq>=1.7", "google-genai>=2.22", "ddgs>=9.0"]   # LLM clients, tool-calling
 ui = ["fastapi>=0.115", "uvicorn>=0.33", "websockets>=13"]     # local HUD frontend (orb/subtitles/waveform)
-rag = []      # embeddings, vector store, retrieval
+rag = ["google-genai>=2.22", "numpy>=1.26,<3", "pypdf>=5.0"]      # Gemini embeddings, numpy vector store, PDF ingest
 eval = []     # eval harness, scoring
 dev = []      # linting, testing, formatting
 
