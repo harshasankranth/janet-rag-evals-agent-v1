@@ -237,3 +237,72 @@ html, body {
   text-shadow: 0 0 12px var(--amber-glow);
   min-height: 2.2rem;
 }
+
+.upload-button {
+  background: transparent;
+  color: var(--amber-dim);
+  border: 1px solid var(--amber-dim);
+  border-radius: 2px;
+  font-family: inherit;
+  font-size: 0.7rem;
+  letter-spacing: 0.15rem;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.upload-button:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.drop-overlay {
+  position: fixed;
+  inset: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--amber);
+  border-radius: 6px;
+  background: rgba(10, 7, 4, 0.85);
+  font-size: 1.1rem;
+  letter-spacing: 0.3rem;
+  text-shadow: 0 0 10px var(--amber-glow);
+  z-index: 20;
+  pointer-events: none;
+}
+
+.doc-toasts {
+  position: fixed;
+  left: 2rem;
+  bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  z-index: 15;
+  max-width: 40vw;
+}
+
+.doc-toast {
+  font-size: 0.75rem;
+  letter-spacing: 0.08rem;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--amber-dim);
+  border-radius: 2px;
+  background: rgba(10, 7, 4, 0.9);
+  transition: opacity 0.4s;
+}
+
+.doc-toast.ready {
+  border-color: var(--amber);
+  box-shadow: 0 0 10px var(--amber-glow);
+}
+
+.doc-toast.error {
+  border-color: #ff6b4a;
+  color: #ff6b4a;
+}
+
+.drop-overlay[hidden] {
+  display: none; /* the display:flex above would otherwise override [hidden] */
+}

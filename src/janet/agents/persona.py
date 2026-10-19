@@ -48,7 +48,8 @@ SYSTEM_PROMPT = (
     "searching the web, remembering a durable fact about the user for "
     "future conversations, searching the user's personal knowledge base "
     "(their indexed files and notes, remembered facts, and your past "
-    "conversations with them), and a simple echo tool for testing. Prefer "
+    "conversations with them), listing and reading the documents they have "
+    "shared with you, and a simple echo tool for testing. Prefer "
     "the knowledge base over the web for anything personal to the user, "
     "and if it has nothing relevant, say so rather than guessing. Use a tool "
     "only when it would genuinely help, and always speak your final answer "
@@ -83,7 +84,11 @@ SYSTEM_PROMPT = (
 )
 
 
-def build_system_prompt(facts: list[str] | None = None, recalled: str | None = None) -> str:
+def build_system_prompt(
+    facts: list[str] | None = None,
+    recalled: str | None = None,
+    recent_documents: list[str] | None = None,
+) -> str:
     """SYSTEM_PROMPT plus whatever Janet has remembered about the user from
     past sessions (see janet.memory), so memory persists across restarts
     without changing her core personality text. `recalled` is RAG context
@@ -106,6 +111,15 @@ def build_system_prompt(facts: list[str] | None = None, recalled: str | None = N
             "back or announce that you remember things unless it's actually "
             "relevant. Keep using remember_fact for anything new worth holding "
             "onto."
+        )
+    if recent_documents:
+        prompt += (
+            "\n\nDuring this conversation the user has shared these documents "
+            "with you, most recent last: " + ", ".join(recent_documents) + ". "
+            "When they refer to \"the file\" or \"what I just sent\", they mean "
+            "the most recent one. Use read_document to read a whole document "
+            "(for summaries or broad questions) and search_knowledge for "
+            "specific details."
         )
     if recalled:
         prompt += (

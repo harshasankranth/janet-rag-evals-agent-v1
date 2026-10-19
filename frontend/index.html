@@ -21,6 +21,9 @@
         <button class="chip" data-emotion="sleepy">😴</button>
         <button class="chip" data-emotion="thinking">🧠</button>
       </div>
+      <button id="upload-button" class="upload-button" type="button" title="Share a document with Janet (or drag one onto the window)">+ FILE</button>
+      <input id="upload-input" type="file" multiple hidden
+        accept=".pdf,.txt,.md,.markdown,.rst,.csv,.json,.py,.js,.ts,.html,.css,.yaml,.yml,.toml" />
       <button id="demo-toggle" class="demo-toggle" type="button">DEMO</button>
       <span class="state-label" id="state-label">OFFLINE</span>
     </div>
@@ -117,6 +120,9 @@
   <aside class="subtitles">
     <div class="line" id="subtitle-line">&nbsp;</div>
   </aside>
+
+  <div id="drop-overlay" class="drop-overlay" hidden>DROP TO SHARE WITH JANET</div>
+  <div id="doc-toasts" class="doc-toasts"></div>
 
   <script src="/static/avatar.js"></script>
   <script src="/static/app.js"></script>

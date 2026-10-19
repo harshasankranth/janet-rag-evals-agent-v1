@@ -15,6 +15,7 @@ from janet.agents.persona import build_system_prompt, extract_emotion
 from janet.agents.tool_loop import run_turn
 from janet.agents.tools import TOOLS
 from janet.memory import load_facts
+from janet.rag.inbox import InboxWatcher
 from janet.rag.retriever import get_retriever
 from janet.stt.recorder import record_utterance
 from janet.stt.transcriber import Transcriber
@@ -112,9 +113,13 @@ def main() -> None:
     speaker = Speaker()
     llm = get_provider()
     retriever = get_retriever()
+    inbox: InboxWatcher | None = None
     if retriever:
         retriever.sync_memories(load_facts())
         print(f"[rag] knowledge base loaded: {retriever.store.stats()['by_kind'] or 'empty'}")
+        inbox = InboxWatcher(retriever, emit)
+        inbox.start()
+        print(f"[rag] drop files onto the HUD or into {config.INBOX_DIR}/ to share them with Janet.")
 
     def say(text: str, language: str | None = None, emotion: str | None = None) -> None:
         interrupt_event.clear()
@@ -177,7 +182,8 @@ def main() -> None:
             # added some) plus whatever the knowledge base recalls for this utterance.
             facts = load_facts()
             recalled = retriever.recall(text, exclude_texts=set(facts)) if retriever else None
-            history[0]["content"] = build_system_prompt(facts, recalled)
+            recent_documents = inbox.recent_documents() if inbox else None
+            history[0]["content"] = build_system_prompt(facts, recalled, recent_documents)
             history.append({"role": "user", "content": text})
             try:
                 reply = run_turn(llm, history, tools=TOOLS)

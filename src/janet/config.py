@@ -53,6 +53,8 @@ EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "gemini-embedding-001")
 EMBEDDING_DIM = int(os.getenv("EMBEDDING_DIM", "768"))
 RAG_RECALL_K = int(os.getenv("RAG_RECALL_K", "4"))
 RAG_MIN_SCORE = float(os.getenv("RAG_MIN_SCORE", "0.6"))
+INBOX_DIR = os.getenv("INBOX_DIR", "data/inbox")
+UPLOAD_MAX_MB = int(os.getenv("UPLOAD_MAX_MB", "25"))
 
 UI_ENABLED = os.getenv("UI_ENABLED", "true").lower() == "true"
 UI_PORT = int(os.getenv("UI_PORT", "8765"))

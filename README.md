@@ -70,6 +70,11 @@ embedded with Gemini's multilingual `gemini-embedding-001`:
   indexed automatically on startup)
 - **conversation turns**, saved after every reply
 
+**Sharing files mid-conversation:** drag a PDF/text file onto the HUD (or
+click **+ FILE**), or copy it into `data/inbox/`. It's indexed in the
+background, and Janet knows you just shared it — ask "summarise the file I
+just sent" (`read_document`) or a specific question about it.
+
 Each turn, the closest matches above `RAG_MIN_SCORE` are added to the system
 prompt automatically, and the model can also call the `search_knowledge` tool
 for a deeper look. Install with `pip install -e .[rag]`; settings are in

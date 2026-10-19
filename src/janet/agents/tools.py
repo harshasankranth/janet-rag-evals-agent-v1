@@ -8,11 +8,13 @@ section and append it to ``TOOLS``. Nothing else needs to change.
 import inspect
 import re
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Callable
 
 from ddgs import DDGS
 
 from janet import memory
+from janet.rag.ingest import read_file
 from janet.rag.retriever import get_retriever
 
 _TYPE_MAP = {
@@ -145,4 +147,61 @@ def search_knowledge(query: str, source: str = "all") -> str:
     return retriever.search(query, kinds=kinds)
 
 
-TOOLS: list[Callable[..., Any]] = [get_current_datetime, web_search, echo, remember_fact, search_knowledge]
+_READ_DOCUMENT_MAX_CHARS = 30_000  # keeps one whole-document read from blowing up the context window
+
+
+def list_documents() -> str:
+    """List the documents and files the user has shared with you or indexed
+    into the knowledge base. Use this when the user asks what files you
+    have, or to find the exact name of a document before reading it.
+    """
+    retriever = get_retriever()
+    if retriever is None:
+        return "The knowledge base is not available right now."
+    sources = retriever.store.sources()
+    if not sources:
+        return "No documents have been shared yet."
+    return "\n".join(Path(s).name for s in sources)
+
+
+def read_document(name: str = "") -> str:
+    """Read the full text of one of the user's documents. Use this to
+    summarise, explain, or answer broad questions about a whole document
+    (e.g. "summarise the PDF I just sent"). For a specific detail, prefer
+    search_knowledge instead.
+
+    Args:
+        name: The document's file name, or part of it (e.g. "lease" for
+            lease.pdf). Leave empty to read the most recently shared document.
+    """
+    retriever = get_retriever()
+    if retriever is None:
+        return "The knowledge base is not available right now."
+    sources = list(retriever.store.sources())  # insertion order, so the last one is the newest
+    if not sources:
+        return "No documents have been shared yet."
+    if name.strip():
+        matches = [s for s in sources if name.strip().lower() in Path(s).name.lower()]
+        if not matches:
+            return f"No document matching {name!r}. Available: {', '.join(Path(s).name for s in sources)}"
+        source = matches[-1]
+    else:
+        source = sources[-1]
+    try:
+        text = read_file(Path(source))
+    except Exception as exc:
+        return f"Could not read {Path(source).name}: {exc}"
+    if len(text) > _READ_DOCUMENT_MAX_CHARS:
+        text = text[:_READ_DOCUMENT_MAX_CHARS] + "\n[...document truncated — use search_knowledge for later parts]"
+    return f"[{Path(source).name}]\n{text}"
+
+
+TOOLS: list[Callable[..., Any]] = [
+    get_current_datetime,
+    web_search,
+    echo,
+    remember_fact,
+    search_knowledge,
+    list_documents,
+    read_document,
+]

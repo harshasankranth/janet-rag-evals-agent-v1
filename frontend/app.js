@@ -65,8 +65,12 @@ function connect() {
   ws.onclose = () => setTimeout(connect, 1000);
   ws.onerror = () => ws.close();
   ws.onmessage = (msg) => {
-    if (demoMode) return;
     const event = JSON.parse(msg.data);
+    if (event.type === "document") {
+      showDocumentEvent(event); // not avatar state, so shown even in demo mode
+      return;
+    }
+    if (demoMode) return;
     switch (event.type) {
       case "state":
         setState(event.value);
@@ -98,6 +102,79 @@ function connect() {
   };
 }
 connect();
+
+// ---- document sharing: drag-and-drop or the + FILE button -> /upload -> inbox watcher ----
+
+const dropOverlay = document.getElementById("drop-overlay");
+const docToasts = document.getElementById("doc-toasts");
+const uploadButton = document.getElementById("upload-button");
+const uploadInput = document.getElementById("upload-input");
+const toastsByName = new Map();
+
+function toast(name, text, kind) {
+  let el = toastsByName.get(name);
+  if (!el) {
+    el = document.createElement("div");
+    docToasts.appendChild(el);
+    toastsByName.set(name, el);
+  }
+  el.className = `doc-toast ${kind || ""}`;
+  el.textContent = text;
+  clearTimeout(el._timer);
+  if (kind === "ready" || kind === "error") {
+    el._timer = setTimeout(() => {
+      el.style.opacity = "0";
+      setTimeout(() => {
+        el.remove();
+        toastsByName.delete(name);
+      }, 400);
+    }, 6000);
+  }
+}
+
+function showDocumentEvent(event) {
+  if (event.status === "indexing") toast(event.name, `READING ${event.name}…`);
+  else if (event.status === "ready") toast(event.name, `✓ JANET HAS READ ${event.name}`, "ready");
+  else if (event.status === "error") toast(event.name, `✗ ${event.name}: ${event.error}`, "error");
+}
+
+async function uploadFiles(files) {
+  for (const file of files) {
+    toast(file.name, `UPLOADING ${file.name}…`);
+    try {
+      const res = await fetch(`/upload?name=${encodeURIComponent(file.name)}`, { method: "POST", body: file });
+      const data = await res.json();
+      if (!res.ok) toast(file.name, `✗ ${data.error || "upload failed"}`, "error");
+      // on success the server's inbox watcher takes over and sends "document" events
+    } catch (err) {
+      toast(file.name, `✗ upload failed: ${err}`, "error");
+    }
+  }
+}
+
+let dragDepth = 0; // dragenter/dragleave fire for every child element, so count them
+document.addEventListener("dragenter", (e) => {
+  if (!e.dataTransfer.types.includes("Files")) return;
+  e.preventDefault();
+  dragDepth++;
+  dropOverlay.hidden = false;
+});
+document.addEventListener("dragover", (e) => e.preventDefault());
+document.addEventListener("dragleave", () => {
+  dragDepth = Math.max(0, dragDepth - 1);
+  if (dragDepth === 0) dropOverlay.hidden = true;
+});
+document.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dragDepth = 0;
+  dropOverlay.hidden = true;
+  if (e.dataTransfer.files.length) uploadFiles(e.dataTransfer.files);
+});
+uploadButton.addEventListener("click", () => uploadInput.click());
+uploadInput.addEventListener("change", () => {
+  uploadFiles(uploadInput.files);
+  uploadInput.value = "";
+});
 
 function currentAmplitude(nowMs) {
   if (state === "listening") {
